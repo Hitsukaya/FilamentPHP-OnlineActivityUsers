@@ -4,8 +4,7 @@ The source code for the [Filament](https://filamentphp.com) website.
 The source code for the [Laravel](https://laravel.com/) website.
 
 ![alt text](https://github.com/Hitsukaya/FilamentPHP-Likes-Post-Blog/blob/main/blog%20post%20like%20button%20filamentphp.png "Like Button")
-![alt text](https://github.com/Hitsukaya/FilamentPHP-Likes-Post-Blog/blob/main/Like%20button%20filamentphp.png "Like Button")
-![alt text](https://github.com/Hitsukaya/FilamentPHP-Likes-Post-Blog/blob/main/filamentphp-laravel-frontend-who-like-users.png "Like Button")
+
 
 ## Developer: Hitsukaya Valentaizar
 ## Email:valentaizarstone@gmail.com / contact@hitsukaya.com 
@@ -65,49 +64,25 @@ return new class extends Migration
 };
 
 ```
-2. Create livewire component
+2. Add in user model
 ```
-php artisan make:livewire LikeButton
+add line 'online_at'
 ```
+
 ```
-<?php
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'online_at',
+    ];
 
-namespace App\Livewire;
-
-use Livewire\Component;
-use Firefly\FilamentBlog\Models\Post;
-
-class LikeButton extends Component
-{
-    public Post $post;
-
-
-    public function toggleLike()
-    {
-        if (auth()->guest())
-        {
-            return $this->redirect(route('login'), true);
-        }
-
-        $user = auth()->user();
-
-
-
-        if ($user->hasLiked($this->post))
-        {
-            $user->likes()->detach($this->post);
-            return;
-        }
-
-        $user->likes()->attach($this->post);
-
-    }
-
-    public function render()
-    {
-        return view('livewire.like-button');
-    }
-}
 ```
 Update
 ```
