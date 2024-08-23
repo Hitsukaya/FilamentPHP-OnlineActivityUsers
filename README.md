@@ -30,41 +30,9 @@ php artisan make:migration create_users_table.php
             $table->timestamps();
         });
 ```
-<?php
-
-//use App\Models\Post;
-use Firefly\FilamentBlog\Models\Post;
-use App\Models\User;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('post_like', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(User::class)->index();
-            $table->foreignIdFor(Post::class)->index();
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('post_like');
-    }
-};
 
 ```
-2. Add in user model
+2. Add line in user model
 ```
 add line 'online_at'
 ```
@@ -84,77 +52,21 @@ add line 'online_at'
     ];
 
 ```
-Update
+3. Add line in user model
+
 ```
- <?php
-
-namespace App\Livewire;
-
-use Livewire\Component;
-use Firefly\FilamentBlog\Models\Post;
-
-class LikeButton extends Component
-{
-    public Post $post;
-    //public bool $isLiked;
-    public bool $isLiked =false;
-    public int $likeCount;
-    public $likes;
-
-    protected $listeners = ['likeToggled' => 'refreshLikes'];
-
-    public function refreshLikes()
-    {
-        $this->post->load('likes');
-    }
-
-    // public function mount()
-    // {
-    //     $this->isLiked = auth()->check() && auth()->user()->hasLiked($this->post);
-    // }
-
-    public function mount(Post $post)
-    {
-        $this->post = $post;
-        $this->isLiked = auth()->check() && auth()->user()->hasLiked($this->post);
-        $this->likeCount = $this->post->likes()->count();
-        $this->likes = $this->post->likes;
-    }
-
-    public function toggleLike()
-    {
-        if (auth()->guest()) {
-            return $this->redirect(route('login'), true);
-        }
-
-        $user = auth()->user();
-
-        if ($this->isLiked) {
-            $user->likes()->detach($this->post);
-            $this->isLiked = false;
-            $this->likeCount--;
-        } else {
-            $user->likes()->attach($this->post);
-            $this->isLiked = true;
-            $this->likeCount++;
-        }
-
-        $this->post->load('likes');
-        $this->likes = $this->post->likes;
-    }
-
-
-    public function render()
-    {
-        return view('livewire.like-button',  [
-            'isLiked' => $this->isLiked,
-            'likeCount' => $this->likeCount,
-            'likes' => $this->likes,
-        ]);
-    }
-}
-
-
+add line  'online_at' => 'datetime',
+```
+```
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'online_at' => 'datetime',
+    ];
  
 ```
 Update 10 Augsut 2024
