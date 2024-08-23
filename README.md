@@ -69,79 +69,48 @@ add line  'online_at' => 'datetime',
     ];
  
 ```
-Update 10 Augsut 2024
+4. Create Middleware - OnlineMiddleware
+```
+ php artisan make:middleware OnlineMiddleware
+```
+
 ```
  <?php
 
-namespace App\Livewire;
+namespace App\Http\Middleware;
 
-use Livewire\Component;
-use Firefly\FilamentBlog\Models\Post;
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+use Exception;
 
-class LikeButton extends Component
+class OnlineMiddleware
 {
-    public Post $post;
-    //public bool $isLiked;
-    public bool $isLiked =false;
-    public int $likeCount;
-    public $likes;
-    public bool $isLikesVisible = false;
-
-
-    protected $listeners = ['likeToggled' => 'refreshLikes'];
-
-    public function refreshLikes()
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function handle(Request $request, Closure $next): Response
     {
-        $this->post->load('likes');
-
-    }
-
-    public function mount(Post $post)
-    {
-        $this->post = $post;
-        $this->isLiked = auth()->check() && auth()->user()->hasLiked($this->post);
-        $this->likeCount = $this->post->likes()->count();
-        $this->likes = $this->post->likes;
-    }
-
-    public function toggleLike()
-    {
-        if (auth()->guest()) {
-
-            return redirect()->route('login');
+        try {
+            // Checks if the user is authenticated
+            if (Auth::check()) {
+                // Updates the 'online_at' field for the authenticated user
+                Auth::user()->update(['online_at' => now()->addMinutes(5)]);
+            }
+        } catch (Exception $e) {
+            \Log::error('Error updating online_at: ' . $e->getMessage());
         }
 
-        $user = auth()->user();
-
-        if ($this->isLiked) {
-            $user->likes()->detach($this->post);
-            $this->isLiked = false;
-            $this->likeCount--;
-        } else {
-            $user->likes()->attach($this->post);
-            $this->isLiked = true;
-            $this->likeCount++;
-        }
-
-        $this->post->load('likes');
-        $this->likes = $this->post->likes;
-    }
-
-    public function toggleLikesVisibility()
-    {
-        $this->isLikesVisible = !$this->isLikesVisible;
-    }
-
-    public function render()
-    {
-        return view('livewire.like-button',  [
-            'isLiked' => $this->isLiked,
-            'likeCount' => $this->likeCount,
-            'likes' => $this->likes,
-            'isLikesVisible' => $this->isLikesVisible,
-        ]);
+        return $next($request);
     }
 }
+
+
  
 ```
 
